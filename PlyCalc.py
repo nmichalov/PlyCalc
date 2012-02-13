@@ -2,7 +2,10 @@ from ply import lex, yacc
 
 tokens = (
     "NUMBER",
-    "PLUS"
+    "PLUS",
+    "MINUS",
+    "TIMES",
+    "DIVIDE"
 )
 
 def t_NUMBER(t):
@@ -11,6 +14,9 @@ def t_NUMBER(t):
     return t
 
 t_PLUS = r"\+"
+t_MINUS = r"\-"
+t_TIMES = r"\*"
+t_DIVIDE = r"\/"
 t_ignore = ' \t'
 
 def t_error(t):
@@ -18,22 +24,40 @@ def t_error(t):
 
 lex.lex()
 
-#lex.input("32+5")
-#for tok in iter(lex.token, None):
-#    print repr(tok.type), repr(tok.value)
 
-def p_expression(p):
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'DIVIDE'),
+    ('right', 'UMINUS')
+    )
+
+
+def p_expression_num(p):
+    "expression : NUMBER"
+    p[0] = p[1]
+
+def p_expression_uminus(p):
+    "expression : MINUS expression %prec UMINUS"
+    p[0] = -p[2]
+
+def p_expression_binop(p):
     """
     expression : expression PLUS expression
-    expression : NUMBER
+               | expression MINUS expression
+               | expression TIMES expression
+               | expression DIVIDE expression
     """
-    if len(p) == 2:
-        p[0] = p[1]
-    elif len(p) == 4:
+    if p[2] == "+":
         p[0] = p[1] + p[3]
+    elif p[2] == "-":
+        p[0] = p[1] - p[3]
+    elif p[2] == "*":
+        p[0] = p[1] * p[3]
+    elif p[2] == "/":
+        p[0] = p[1] / p[3]
 
 def p_error(p):
     print "Syntax error at '%s'" % p.value
 
 yacc.yacc()
-print yacc.parse("25  +6")
+print yacc.parse("25  +-6 * 10")
