@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A python parser calculator
+A python parser calculator using PLY.
 """
 
 from ply import lex, yacc
